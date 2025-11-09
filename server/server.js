@@ -11,14 +11,12 @@ import { createClient } from "@supabase/supabase-js";
 ================================ */
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Carga variables .env desde la raíz del proyecto
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
 
 /* ================================
-   🌐 CORS CONFIG
+   🌐 CORS CONFIG (FULL FIX)
 ================================ */
 const allowedOrigins = [
   "https://libertrades.xyz",
@@ -27,21 +25,18 @@ const allowedOrigins = [
   "http://localhost:5173",
 ];
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Permitir requests sin origin (ej: curl, Postman)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error("Not allowed by CORS: " + origin), false);
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: false,
-};
-
-app.use(cors(corsOptions));
-// Preflight explícito para cualquier ruta
-app.options("*", cors(corsOptions));
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -137,7 +132,7 @@ app.post("/create-mp-preference", async (req, res) => {
     return res.json(data);
   } catch (err) {
     console.error("🔥 Error en servidor:", err);
-    return res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -175,11 +170,8 @@ app.post("/webhook", async (req, res) => {
             .update({ approved: true })
             .eq("id", graffitiId);
 
-          if (error) {
-            console.error("❌ Error actualizando graffiti:", error);
-          } else {
-            console.log("🟩 Graffiti aprobado con éxito en Supabase.");
-          }
+          if (error) console.error("❌ Error actualizando graffiti:", error);
+          else console.log("🟩 Graffiti aprobado con éxito en Supabase.");
         }
       }
     }
@@ -198,7 +190,6 @@ if (isProduction) {
   const distPath = path.resolve(__dirname, "../dist");
   app.use(express.static(distPath));
 
-  // Catch-all para SPA
   app.use((req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
