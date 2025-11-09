@@ -18,13 +18,15 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 const app = express();
 
 /* ================================
-   🌐 CORS CONFIG (Render + Local)
+   🌐 CORS CONFIG
 ================================ */
 app.use(
   cors({
     origin: [
-      "https://graffitisramallo1.onrender.com", // frontend Render
-      "http://localhost:5173",                  // desarrollo local
+      "https://libertrades.xyz",
+      "https://www.libertrades.xyz",
+      "https://graffitisramallo1.onrender.com",
+      "http://localhost:5173",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -186,7 +188,7 @@ if (isProduction) {
   const distPath = path.resolve(__dirname, "../dist");
   app.use(express.static(distPath));
 
-  // ✅ FIX Express 5: usar app.use() como catch-all
+  // ✅ Express 5: usar app.use() como catch-all
   app.use((req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
