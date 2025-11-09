@@ -20,18 +20,28 @@ const app = express();
 /* ================================
    🌐 CORS CONFIG
 ================================ */
-app.use(
-  cors({
-    origin: [
-      "https://libertrades.xyz",
-      "https://www.libertrades.xyz",
-      "https://graffitisramallo1.onrender.com",
-      "http://localhost:5173",
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+const allowedOrigins = [
+  "https://libertrades.xyz",
+  "https://www.libertrades.xyz",
+  "https://graffitisramallo1.onrender.com",
+  "http://localhost:5173",
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Permitir requests sin origin (ej: curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Not allowed by CORS: " + origin), false);
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: false,
+};
+
+app.use(cors(corsOptions));
+// Preflight explícito para cualquier ruta
+app.options("*", cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -188,7 +198,7 @@ if (isProduction) {
   const distPath = path.resolve(__dirname, "../dist");
   app.use(express.static(distPath));
 
-  // ✅ Express 5: usar app.use() como catch-all
+  // Catch-all para SPA
   app.use((req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
