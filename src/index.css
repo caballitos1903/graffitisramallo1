@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Estilo base ===== */
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-neutral-900 text-neutral-100 antialiased min-h-screen;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-image: repeating-linear-gradient(
+    45deg,
+    #111 0,
+    #111 10px,
+    #141414 10px,
+    #141414 20px
+  );
+}
+
+/* ===== Scroll personalizado ===== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 4px;
+}
+
+/* ===== Transiciones suaves ===== */
+button,
+a,
+input,
+textarea {
+  @apply transition-all duration-200;
+}
