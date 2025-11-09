@@ -16,7 +16,21 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
-app.use(cors());
+
+/* ================================
+   🌐 CORS CONFIG (Render + Local)
+================================ */
+app.use(
+  cors({
+    origin: [
+      "https://graffitisramallo1.onrender.com", // frontend Render
+      "http://localhost:5173",                  // desarrollo local
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -42,7 +56,9 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 }
 
 // 🧩 Cliente Supabase
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: false },
+});
 
 /* ================================
    🔵 CREAR PREFERENCIA MP
