@@ -87,14 +87,17 @@ app.post("/create-mp-preference", async (req, res) => {
     console.log("📦 Enviando preferencia a Mercado Pago...");
     console.log("🔑 Token parcial:", mpToken.slice(0, 15) + "...");
 
-    const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${mpToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(preference),
-    });
+    const response = await fetch(
+      "https://api.mercadopago.com/checkout/preferences",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${mpToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(preference),
+      }
+    );
 
     const data = await response.json();
     if (!response.ok) {
@@ -125,9 +128,12 @@ app.post("/webhook", async (req, res) => {
       const paymentResponse = await fetch(
         `https://api.mercadopago.com/v1/payments/${paymentId}`,
         {
-          headers: { Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}` },
+          headers: {
+            Authorization: `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+          },
         }
       );
+
       const paymentData = await paymentResponse.json();
       console.log("💰 Pago confirmado:", paymentData);
 
@@ -164,7 +170,8 @@ if (isProduction) {
   const distPath = path.resolve(__dirname, "../dist");
   app.use(express.static(distPath));
 
-  app.get("*", (req, res) => {
+  // 🟩 FIX: Express 5 exige ruta válida, no solo "*"
+  app.get("/*", (req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
 }
@@ -176,7 +183,9 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(
     `🚀 Servidor corriendo en ${
-      isProduction ? `https://libertrades.xyz (puerto ${PORT})` : `http://localhost:${PORT}`
+      isProduction
+        ? `https://libertrades.xyz (puerto ${PORT})`
+        : `http://localhost:${PORT}`
     }`
   );
 });
