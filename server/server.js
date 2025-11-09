@@ -170,8 +170,8 @@ if (isProduction) {
   const distPath = path.resolve(__dirname, "../dist");
   app.use(express.static(distPath));
 
-  // 🟩 FIX: Express 5 exige ruta válida, no solo "*"
-  app.get("/*", (req, res) => {
+  // ✅ FIX Express 5: usar app.use() como catch-all
+  app.use((req, res) => {
     res.sendFile(path.join(distPath, "index.html"));
   });
 }
