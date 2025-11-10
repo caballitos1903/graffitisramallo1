@@ -16,6 +16,24 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 const app = express();
 
 /* ================================
+   🔁 Forzar HTTPS y dominio principal
+================================ */
+app.use((req, res, next) => {
+  // Fuerza HTTPS si Render usa proxy (x-forwarded-proto)
+  if (req.headers["x-forwarded-proto"] && req.headers["x-forwarded-proto"] !== "https") {
+    return res.redirect(301, `https://${req.headers.host}${req.url}`);
+  }
+
+  // Redirige www → sin www
+  if (req.headers.host && req.headers.host.startsWith("www.")) {
+    const newHost = req.headers.host.replace(/^www\./, "");
+    return res.redirect(301, `https://${newHost}${req.url}`);
+  }
+
+  next();
+});
+
+/* ================================
    🌐 CORS CONFIG (FULL FIX)
 ================================ */
 const allowedOrigins = [
